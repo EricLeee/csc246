@@ -48,9 +48,13 @@ public class Square {
     }
     
     public static void main( String[] args ) {
-        num = (int)args[ 0 ].charAt( 0 );
+
+    	try {
+    		num = Integer.parseInt(args[ 0 ]);
+    	} catch ( NumberFormatException e ) {
+    		System.out.println( "first argument must be int\n" );
+    	}
         
-        @SuppressWarnings("resource")
 		Scanner fd = new Scanner( System.in );
         
         if( args.length == 2 && args[ 1 ].equals("report") )
@@ -59,19 +63,20 @@ public class Square {
         rows = fd.nextInt();
         cols = fd.nextInt();
         grid = new char[ rows ][ cols ];
+        fd.nextLine();
         
         String temp = null;
-        int rowNum = 0;
-        while( fd.hasNextLine() ){
+        for( int j = 0; j < rows; j++ ){
             temp = fd.nextLine();
-            for( int i = 0; i < cols; i++ ) {
-                grid[ rowNum ][ i ] = temp.charAt( i );
-                
-            }
-            rowNum++;
+            for( int i = 0; i < cols; i++ )
+                grid[ j ][ i ] = temp.charAt( i );
+            
+            //rowNum++;
 
         }
+        fd.close();
         
+        //System.out.println("scann Done");
         thread1[] worker = new thread1[ num ];
         
         for( int i = 0; i < num; i++ ) {
