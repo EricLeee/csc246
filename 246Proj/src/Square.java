@@ -16,22 +16,30 @@ public class Square {
         
         private char alph[];
         
+        private int count = 0;
+        
         public thread1( int r, int c ) {
             this.startR = r;
             this.startC = c;
             this.alph = new char[ 26 ];
         }
         
+        public void setStartLoc( int r ) {
+        	this.startR = r;
+        }
+        
         @Override
         public void run() {
-            for( int i = 0; i < startR; i++ ) {
-                for( int j = 0; j < startC; j++ ) {
+            for( int i = startR; i < startR + 6; i++ ) {
+                for( int j = startC; j < startC + 6; j++ ) {
                     char c = grid[ i ][ j ];
                     int ch = (int)c - 97;
                     if ( alph[ ch ] == ' ' )
                         alph[ ch ] = c;
                 }
             }
+            if( alph.length == 26 )
+            	this.count++;
             
         }
         
@@ -62,6 +70,13 @@ public class Square {
             }
             rowNum++;
 
+        }
+        
+        thread1 worker[] = new thread1[ num ];
+        
+        //
+        for( int i = 0; i < num; i++ ) {
+        	worker[ i ] = new thread1(0, 0);
         }
     }
 }
