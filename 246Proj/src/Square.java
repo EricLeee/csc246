@@ -14,34 +14,51 @@ public class Square {
 
         private int startC;
         
-        private int workerNum;
+        private int startR;
         
         private char alph[];
         
         protected int count = 0;
         
-        public thread1( int workerNum ) {
+        private int size;
+        
+        public thread1( int startRow ) {
         	
-        	this.workerNum = workerNum;
+        	this.startR = startRow;
             this.startC = 0;
+            this.size = 0;
         	this.alph = new char[ 26 ];
-        	
         }
         
         @Override
         public void run() {
-        	int i = workerNum;
-        	while( i + 6 < rows ) {
-                for( int j = startC; j < startC + 6; j++ ) {
-                    char c = grid[ i ][ j ];
-                    int ch = (int)c - 97;
-                    if ( alph[ ch ] == ' ' )
-                        alph[ ch ] = c;
-                }
-                i += num;
+        	while( startR + 6 <= rows ) {
+        	    for( int k = startC; k <= cols - 6; k++ ) {
+        	        for( int i = startR; i < startR + 6; i++ ) {
+                        for( int j = k; j < k + 6; j++ ) {
+                            char c = grid[ i ][ j ];
+                            int ch = (int)c - 97;
+                            if ( alph[ ch ] == 0 ) {
+                                alph[ ch ] = c;
+                                size++;
+                            }
+                                
+                        }
+                    }
+                    if( size == 26 ) {
+                        this.count++;
+                        if( report )
+                            System.out.println( startR + " " + k );
+                    }
+                        
+                    
+                    alph = new char[ 26 ];
+                    size = 0;
+        	    }
+        	    
+                startR += num;
+                startC = 0;
             }
-            if( alph.length == 26 )
-            	this.count++;
             
         }
         
@@ -71,12 +88,9 @@ public class Square {
             for( int i = 0; i < cols; i++ )
                 grid[ j ][ i ] = temp.charAt( i );
             
-            //rowNum++;
-
         }
         fd.close();
         
-        //System.out.println("scann Done");
         thread1[] worker = new thread1[ num ];
         
         for( int i = 0; i < num; i++ ) {
@@ -97,10 +111,7 @@ public class Square {
     	for( int i = 0; i < num; i++ )
     		total += worker[ i ].count;
     	
-    	System.out.println( total + "\n" );
+    	System.out.println( "Squares: " + total );
     	
-        if( report ) {
-        	
-        }
     }
 }
