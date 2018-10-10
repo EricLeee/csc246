@@ -1,5 +1,10 @@
 import java.util.Scanner;
 
+/**
+ * scan square and count numbers of complete squares
+ * @author Jialang Li
+ *
+ */
 public class Square {
     
     private static int num;
@@ -42,7 +47,6 @@ public class Square {
                                 alph[ ch ] = c;
                                 size++;
                             }
-                                
                         }
                     }
                     if( size == 26 ) {
@@ -51,7 +55,6 @@ public class Square {
                             System.out.println( startR + " " + k );
                     }
                         
-                    
                     alph = new char[ 26 ];
                     size = 0;
         	    }
