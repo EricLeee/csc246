@@ -1,5 +1,5 @@
 import java.util.concurrent.Semaphore;
-import java.util.Random;
+//import java.util.Random;
 
 /** Simulation of the dining philosophers problem, the standard, flawed
     solution using semaphores. */

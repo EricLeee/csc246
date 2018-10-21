@@ -28,22 +28,59 @@ public class SmileyMonitor {
       threads.  You'll need to extend this monitor to enforce
       the required synchronization behavior. */
   private static class MyMonitor {
+    private enum state { eye, nose, mouth };
 
-    private void printEyes( char sym ) {
+    private state s = state.eye;
+    
+    private synchronized void printEyes( char sym ) {
 
+      while( s != state.eye ) {
+        try {
+            wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+          
+      }
       System.out.print( sym );
+
+      s = state.nose;
+      notifyAll();
 
     }
 
-    private void printNose( char sym ) {
+    private synchronized void printNose( char sym ) {
       
+        while( s != state.nose ) {
+           try {
+            wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+           
+        }
       System.out.print( sym );
+      
+      s = state.mouth;
+      
+      notifyAll();
 
     }
 
-    private void printMouth( char sym ) {
+    private synchronized void printMouth( char sym ) {
       
+      while( s != state.mouth ) {
+          try {
+            wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+      }
       System.out.println( sym );
+      
+      s = state.eye;
+      
+      notifyAll();
 
     }
   }

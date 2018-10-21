@@ -17,43 +17,43 @@ public class Square {
 
     static class thread1 extends Thread {
 
-        private int startC;
+    private int startC;
         
-        private int startR;
+    private int startR;
         
-        private char alph[];
+    private char alph[];
+  
+    private int count = 0;
         
-        protected int count = 0;
-        
-        private int size;
-        
-        public thread1( int startRow ) {
+    private int size;
+    
+    public thread1( int startRow ) {
         	
-        	this.startR = startRow;
-            this.startC = 0;
-            this.size = 0;
-        	this.alph = new char[ 26 ];
-        }
+        this.startR = startRow;
+        this.startC = 0;
+        this.size = 0;
+    	this.alph = new char[ 26 ];
+    }
         
-        @Override
-        public void run() {
-        	while( startR + 6 <= rows ) {
-        	    for( int k = startC; k <= cols - 6; k++ ) {
-        	        for( int i = startR; i < startR + 6; i++ ) {
-                        for( int j = k; j < k + 6; j++ ) {
-                            char c = grid[ i ][ j ];
-                            int ch = (int)c - 97;
-                            if ( alph[ ch ] == 0 ) {
-                                alph[ ch ] = c;
-                                size++;
-                            }
+    @Override
+    public void run() {
+      	while( startR + 6 <= rows ) {
+       	    for( int k = startC; k <= cols - 6; k++ ) {
+       	        for( int i = startR; i < startR + 6; i++ ) {
+                    for( int j = k; j < k + 6; j++ ) {
+                        char c = grid[ i ][ j ];
+                        int ch = (int)c - 97;
+                        if ( alph[ ch ] == 0 ) {
+                            alph[ ch ] = c;
+                            size++;
                         }
                     }
-                    if( size == 26 ) {
-                        this.count++;
-                        if( report )
-                            System.out.println( startR + " " + k );
-                    }
+                }
+                if( size == 26 ) {
+                    this.count++;
+                    if( report )
+                        System.out.println( startR + " " + k );
+                }
                         
                     alph = new char[ 26 ];
                     size = 0;

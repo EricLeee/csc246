@@ -7,6 +7,13 @@ public class SmileySemaphore {
 
   /** Semaphores you declare and initialize here will be visible
       to all your threads (they'll need to be static. */
+  static public Semaphore EYE = new Semaphore( 1 );
+  
+  static public Semaphore NOSE = new Semaphore( 0 );
+  
+  static public Semaphore MOUTH = new Semaphore( 0 );
+  
+  static public Semaphore LOCK = new Semaphore( 1 );
 
   /**
      A thread with a function to let it wait periodically.  In
@@ -44,9 +51,20 @@ public class SmileySemaphore {
       for ( int i = 0; i < LIMIT; i++ ) {
 
         hesitate( 10 );
+        try {
+            EYE.acquire();
+            LOCK.acquire();
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
 
         // Print my symbol for the nose.
         System.out.print( sym );
+        
+        NOSE.release();
+        LOCK.release();
 
       }
     }
@@ -63,12 +81,16 @@ public class SmileySemaphore {
     
     public void run() {
       for ( int i = 0; i < LIMIT; i++ ) {
-
         hesitate( 10 );
+
+        NOSE.acquireUninterruptibly();
+        LOCK.acquireUninterruptibly();
 
         // Print my symbol for the nose.
         System.out.print( sym );
         
+        MOUTH.release();
+        LOCK.release();
       }
     }
   }
@@ -86,10 +108,14 @@ public class SmileySemaphore {
       for ( int i = 0; i < LIMIT; i++ ) {
 
         hesitate( 10 );
+        MOUTH.acquireUninterruptibly();
+        LOCK.acquireUninterruptibly();
 
         // I print the mouth symbol and the newline.
         System.out.println( sym );
 
+        EYE.release();
+        LOCK.release();
       }
     }
   }
