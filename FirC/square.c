@@ -8,6 +8,7 @@
 // Size of the square we're looking for.
 #define SQUARE_WIDTH 6
 #define SQUARE_HEIGHT 6
+#define ASCIICONVERT 97
 
 // Print out an error message and exit.
 static void fail( char const *message ) {
@@ -44,6 +45,10 @@ Row *grid;
 
 sem_t lock;
 
+sem_t idxLock;
+
+sem_t totalLock;
+
 int idx = 0;
 
 // Total number of complete squares we've found.
@@ -75,26 +80,68 @@ void readGrid() {
 /** Start routine for each worker. */
 void *workerRoutine( void *arg ) {
   // ...
-  while ( rowCount - idx < SQUARE_HEIGHT )
-	  sem_wait( &lock );
-
-  int startR = idx;
-  char c;
-  for ( int i = 0; i < cols - SQUARE_HEIGHT; i++ ) {
-	   for ( int j = 0; j < SQUARE_WIDTH; j++ ) {
-		   for ( int k = 0; k < SQUARE_HEIGHT; k++ ) {
-			   c = *( grid + j + startR )[ k ];
-			   printf( "%c ", c );
-		   }
-	   }
-  }
-
-  acquire( lock );
-
-
-	
+  int startR;
+  sem_wait( &idxLock );
+  startR = idx;
   idx++;
-  sem_post( &lock );
+  sem_post( &idxLock );
+
+  char alph[ 26 ];
+  memset( alph, '\0', 26);
+
+  int size = 0;
+  int ch;
+
+  while ( startR <= rows - SQUARE_HEIGHT || rows == 0 )
+  {
+
+	  while ( rowCount - startR < SQUARE_HEIGHT )
+	  {
+		  if ( rowCount == rows && rows != 0 )
+			  return NULL;
+		  sem_wait( &lock );
+	  }
+
+	  for ( int i = 0; i <= cols - SQUARE_WIDTH; i++ )
+	  {
+	    for ( int j = startR; j < startR + SQUARE_HEIGHT; j++ )
+	    {
+	    	for ( int k = i; k < i + SQUARE_WIDTH; k++ )
+	    	{
+	    		ch = ( int ) grid[ j ][ k ] - ASCIICONVERT;
+	    		if ( alph[ ch ] == '\0' )
+	    		{
+	    			alph[ ch ] = grid[ j ][ k ];
+	    			size++;
+	    		}
+
+	    	}
+
+	  	}
+	    if ( size == 26 )
+	    {
+	    	sem_wait( &totalLock );
+	    	total++;
+	    	sem_post( &totalLock );
+
+	    	if ( report )
+	    		printf( "%d %d\n", startR, i );
+	    }
+	  //  printf( "%s\n", alph );
+	    memset( alph, '\0', 26 );
+	    size = 0;
+	  }
+
+	  sem_post( &lock );
+
+
+	  sem_wait( &idxLock );
+	  startR = idx;
+	  idx++;
+	  sem_post( &idxLock );
+
+
+  }
 
   return NULL;
 }
@@ -119,11 +166,13 @@ int main( int argc, char *argv[] ) {
 
 
   sem_init( &lock, 0, 1 );
+  sem_init( &idxLock, 0, 1 );
+  sem_init( &totalLock, 0, 1 );
   // Make each of the workers.
   pthread_t worker[ workers ];
   for ( int i = 0; i < workers; i++ )
     // ...
-	if ( pthread_create( worker + i, NULL, workerRoutine, NULL ) != 0 )
+	if ( pthread_create( worker + i, NULL, workerRoutine, &i ) != 0 )
 		fail( "can't create thread\n" );
 
   // Then, start getting work for them to do.
@@ -134,6 +183,9 @@ int main( int argc, char *argv[] ) {
     // ...
 	pthread_join( worker[ i ], NULL );
 
+  sem_destroy( &lock );
+  sem_destroy( &idxLock );
+  sem_destroy( &totalLock );
   // Report the total and release the semaphores.
   printf( "Squares: %d\n", total );
   
