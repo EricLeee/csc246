@@ -15,6 +15,12 @@ typedef struct {
 
   // Add other fields that you need.
   // ...
+  int size;
+
+  pthread_cond_t pairCond;
+
+  pthread_mutex_t mon;
+
 } Pair;
 
 // True if we're still running.
@@ -41,6 +47,11 @@ void initPairMonitor( int capacity ) {
     // No threads are part of this pair yet.
     strcpy( pairList[ i ].name[ 0 ], "" );
     strcpy( pairList[ i ].name[ 1 ], "" );
+    pairList[ i ].size = 0;
+
+    pthread_cond_init( &pairList[ i ].pairCond, NULL );
+    pthread_mutex_init( &pairList[ i ].mon, NULL );
+
   }
 }
 
@@ -65,9 +76,30 @@ void destroyPairMonitor() {
 bool enter( const char *name ) {
 
   // Find the index of an available Pair on the pairList.
-  int idx = /* ... */;
+  int idx = -1;
+  for ( int i = 0; i < cap; i++ )
+  {
+	  if ( pairList[ i ].size < 2 )
+		  idx = i;
+  }
+
+  if ( idx == -1 )
+	  return false;
 
   // ...
+  	pthread_mutex_lock( &pairList[ idx ].mon );
+
+    while ( pairList[ idx ].size < 2 )
+    	pthread_cond_wait( &pairList[ idx ].pairCond );
+
+    pairList[ idx ].name[ pairList[ idx ].size ] = name;
+
+    pairList[ idx ].size++;
+
+    pthread_mutex_unlock( &pairList[ idx ].mon );
+
+    pthread_cond_signal( &pairList[ idx ].pairCond );
+
 
     // The second thread to join the pair can report when the two threads
     // enter.
@@ -84,7 +116,7 @@ bool enter( const char *name ) {
 void leave( const char *name ) {
 
   // Find the index of the Pair object we're part of.
-  int idx = /* ... */;
+  int idx = -1;
 
   // ...
 
